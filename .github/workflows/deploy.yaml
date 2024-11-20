@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+
 
     steps:
     - name: Checkout code
@@ -25,10 +25,9 @@ jobs:
 
     - name: Merge dev into prod
       run: |
-        git merge origin/dev --allow-unrelated-histories
+
 
     - name: Push changes to prod branch
       run: |
         git push origin prod
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
