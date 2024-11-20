@@ -13,19 +13,15 @@ jobs:
       # Step 1: Check out the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
-<<<<<<< HEAD
-=======
         with:
           fetch-depth: 0  # Ensure all branches are fetched
->>>>>>> 4933d9dd6bc3fd889e329290a5ff75a41ab3dbf0
-
       # Step 2: Set up Git
       - name: Set up Git
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-
-<<<<<<< HEAD
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Step 3: Merge dev into uat
       - name: Merge Dev into UAT
         run: |
@@ -41,7 +37,6 @@ jobs:
           git push origin prod
 
       # Step 5: Merge dev into main
-=======
       # Step 3: Fetch all branches
       - name: Fetch All Branches
         run: git fetch --all
@@ -61,7 +56,6 @@ jobs:
           git push origin prod
 
       # Step 6: Merge dev into main
->>>>>>> 4933d9dd6bc3fd889e329290a5ff75a41ab3dbf0
       - name: Merge Dev into Main
         run: |
           git checkout main
