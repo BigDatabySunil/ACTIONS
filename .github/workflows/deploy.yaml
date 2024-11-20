@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Use a GitHub-hosted runner (you can change it based on your preference)
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -25,10 +25,10 @@ jobs:
 
     - name: Merge dev into prod
       run: |
-        git merge origin/dev  # Merge changes from dev into prod
+        git merge origin/dev --allow-unrelated-histories
 
     - name: Push changes to prod branch
       run: |
         git push origin prod
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub automatically provides this token to authenticate the push
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
