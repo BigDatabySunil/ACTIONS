@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Ensure all branches are fetched
+
       # Step 2: Set up Git
       - name: Set up Git
         run: |
@@ -22,42 +23,39 @@ jobs:
           git config user.email "actions@github.com"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # Step 3: Merge dev into uat
       - name: Merge Dev into UAT
         run: |
+          echo "Attempting to merge dev into uat..."
           git checkout uat
-          git merge dev --no-ff -m "Auto-merge changes from dev to uat"
-          git push origin uat
+          if ! git merge dev --no-ff -m "Auto-merge changes from dev to uat"; then
+            echo "Merge failed. Conflicts detected:"
+            git --no-pager diff --name-only --diff-filter=U  # List files with conflicts
+            exit 1  # Stop the workflow with an error
+          fi
+          git push origin uat || echo "Push to uat failed. Resolve conflicts manually."
 
       # Step 4: Merge dev into prod
       - name: Merge Dev into Prod
         run: |
+          echo "Attempting to merge dev into prod..."
           git checkout prod
-          git merge dev --no-ff -m "Auto-merge changes from dev to prod"
-          git push origin prod
+          if ! git merge dev --no-ff -m "Auto-merge changes from dev to prod"; then
+            echo "Merge failed. Conflicts detected:"
+            git --no-pager diff --name-only --diff-filter=U  # List files with conflicts
+            exit 1  # Stop the workflow with an error
+          fi
+          git push origin prod || echo "Push to prod failed. Resolve conflicts manually."
 
       # Step 5: Merge dev into main
-      # Step 3: Fetch all branches
-      - name: Fetch All Branches
-        run: git fetch --all
-
-      # Step 4: Merge dev into uat
-      - name: Merge Dev into UAT
-        run: |
-          git checkout uat
-          git merge dev --no-ff -m "Auto-merge changes from dev to uat"
-          git push origin uat
-
-      # Step 5: Merge dev into prod
-      - name: Merge Dev into Prod
-        run: |
-          git checkout prod
-          git merge dev --no-ff -m "Auto-merge changes from dev to prod"
-          git push origin prod
-
-      # Step 6: Merge dev into main
       - name: Merge Dev into Main
         run: |
+          echo "Attempting to merge dev into main..."
           git checkout main
-          git merge dev --no-ff -m "Auto-merge changes from dev to main"
-          git push origin main
+          if ! git merge dev --no-ff -m "Auto-merge changes from dev to main"; then
+            echo "Merge failed. Conflicts detected:"
+            git --no-pager diff --name-only --diff-filter=U  # List files with conflicts
+            exit 1  # Stop the workflow with an error
+          fi
+          git push origin main || echo "Push to main failed. Resolve conflicts manually."
