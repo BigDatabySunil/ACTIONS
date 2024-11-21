@@ -12,7 +12,7 @@ def clean_column_data(value):
         str: Cleaned column value.
     """
     if isinstance(value, str):
-        # Replace unwanted delimiters with a space or remove them
+        # 
         value = re.sub(r'[|!%&]', ' ', value)
         # Remove extra spaces
         value = re.sub(r'\s+', ' ', value).strip()
