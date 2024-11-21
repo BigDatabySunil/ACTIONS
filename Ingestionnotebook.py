@@ -17,7 +17,7 @@ def clean_column_data(value):
         # Remove extra spaces
         value = re.sub(r'\s+', ' ', value).strip()
     return value
-
+ # new function
 
 def read_and_clean_employee_data(file_path):
     """
