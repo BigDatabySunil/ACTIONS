@@ -1,0 +1,113 @@
+name: Dev to Main Deployment Workflow
+
+on:
+  push:
+    branches:
+      - dev  # This triggers the action when changes are pushed to dev
+
+jobs:
+  # Job 1: Test in a temporary test branch
+  test_branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v3
+
+      - name: Create a test branch
+        run: |
+          git checkout -b test-branch
+          git push origin test-branch
+
+      - name: Run Unit Tests
+        run: |
+          # Install dependencies and run your tests
+          pip install -r requirements.txt
+          pytest  # or the testing tool you are using
+
+      - name: Check test results and proceed
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "Tests passed, proceeding with merges."
+          else
+            echo "Tests failed, exiting."
+            exit 1
+          fi
+
+  # Job 2: Merge to UAT and run tests
+  merge_to_uat:
+    needs: test_branch
+    runs-on: ubuntu-latest
+    if: success()  # Only runs if tests on the test branch passed
+
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v3
+
+      - name: Merge dev into UAT
+        run: |
+          git checkout uat
+          git merge dev --no-ff -m "Merge changes from dev to uat"
+          git push origin uat
+
+      - name: Run UAT Tests
+        run: |
+          # Install dependencies and run tests for UAT
+          pip install -r requirements.txt
+          pytest  # or the testing tool you are using
+
+      - name: Check UAT test results and proceed
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "UAT tests passed, proceeding with Prod merge."
+          else
+            echo "UAT tests failed, exiting."
+            exit 1
+          fi
+
+  # Job 3: Merge to Prod and run tests
+  merge_to_prod:
+    needs: merge_to_uat
+    runs-on: ubuntu-latest
+    if: success()  # Only runs if tests on UAT passed
+
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v3
+
+      - name: Merge dev into Prod
+        run: |
+          git checkout prod
+          git merge dev --no-ff -m "Merge changes from dev to prod"
+          git push origin prod
+
+      - name: Run Prod Tests
+        run: |
+          # Install dependencies and run tests for Prod
+          pip install -r requirements.txt
+          pytest  # or the testing tool you are using
+
+      - name: Check Prod test results and proceed
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "Prod tests passed, proceeding with Main merge."
+          else
+            echo "Prod tests failed, exiting."
+            exit 1
+          fi
+
+  # Job 4: Final Merge to Main
+  merge_to_main:
+    needs: merge_to_prod
+    runs-on: ubuntu-latest
+    if: success()  # Only runs if tests on Prod passed
+
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v3
+
+      - name: Merge dev into Main
+        run: |
+          git checkout main
+          git merge dev --no-ff -m "Merge changes from dev to main"
+          git push origin main
